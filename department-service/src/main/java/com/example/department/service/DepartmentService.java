@@ -1,6 +1,8 @@
 package com.example.department.service;
 
 import com.example.department.entity.Department;
+import com.example.department.exception.ResourceAlreadyExistsException;
+import com.example.department.exception.ResourceNotFoundException;
 import com.example.department.repository.DepartmentRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +15,15 @@ public class DepartmentService {
     }
 
     public Department saveDepartment(Department department) {
+        if (department.getDepartmentId() != null &&
+                departmentRepository.existsById(department.getDepartmentId())) {
+            throw new ResourceAlreadyExistsException(department.getDepartmentId());
+        }
         return departmentRepository.save(department);
     }
 
     public Department findDepartmentById(Long id) {
-        // TODO fix resource not found error
-        return departmentRepository.findById(id).get();
+        return departmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id));
     }
 }
